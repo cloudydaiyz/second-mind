@@ -1,0 +1,15 @@
+{
+  "name": "second-mind",
+  "version": "1.0.0",
+  "keywords": [],
+  "author": "Kylan Duncan",
+  "license": "ISC",
+  "private": true,
+  "main": "Code.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@google/clasp": "^3.4.1"
+  }
+}
