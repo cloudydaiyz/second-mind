@@ -98,6 +98,32 @@ function getOrdinal(day) {
   }
 }
 
+/**
+ * Updates all `{prefix}_*` date placeholders in the Google Doc
+ * based on the given reference date (`refDate`).
+ * 
+ * For example,
+ * if `prefix = "CURRENT"` and the reference date was 8/11/26.
+ *
+ * Placeholders:
+ *
+ * {{CURRENT_WEEK}}
+ * {{CURRENT_SUNDAY}}
+ * {{CURRENT_MONDAY}}
+ * {{CURRENT_TUESDAY}}
+ * {{CURRENT_WEDNESDAY}}
+ * {{CURRENT_THURSDAY}}
+ * {{CURRENT_FRIDAY}}
+ * {{CURRENT_SATURDAY}}
+ *
+ * {{CURRENT_WEEK}}
+ * -> Week of 8/9/26 - 8/15/26
+ *
+ * {{CURRENT_MONDAY}}
+ * -> Monday, August 10th, 2026 (8/10/2026)
+ * 
+ * etc.
+ */
 function updateWeekDates(prefix, refDate) {
   const doc = DocumentApp.getActiveDocument();
   const body = doc.getBody();
@@ -151,28 +177,6 @@ function updateWeekDates(prefix, refDate) {
   doc.saveAndClose();
 }
 
-/**
- * Updates all CURRENT_* date placeholders in the Google Doc.
- *
- * Placeholders:
- *
- * {{CURRENT_WEEK}}
- * {{CURRENT_SUNDAY}}
- * {{CURRENT_MONDAY}}
- * {{CURRENT_TUESDAY}}
- * {{CURRENT_WEDNESDAY}}
- * {{CURRENT_THURSDAY}}
- * {{CURRENT_FRIDAY}}
- * {{CURRENT_SATURDAY}}
- *
- * Examples:
- *
- * {{CURRENT_WEEK}}
- * -> Week of 8/9/26 - 8/15/26
- *
- * {{CURRENT_MONDAY}}
- * -> Monday, August 10th, 2026 (8/10/2026)
- */
 function updateCurrentWeekDates() {
   // updateWeekDates("CURRENT", new Date());
   updateWeekDates("CUSTOM", new Date());
