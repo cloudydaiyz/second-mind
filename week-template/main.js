@@ -1,91 +1,37 @@
-/**
- * Updates all CURRENT_* date placeholders in the Google Doc.
- *
- * Placeholders:
- *
- * {{CURRENT_WEEK}}
- * {{CURRENT_SUNDAY}}
- * {{CURRENT_MONDAY}}
- * {{CURRENT_TUESDAY}}
- * {{CURRENT_WEDNESDAY}}
- * {{CURRENT_THURSDAY}}
- * {{CURRENT_FRIDAY}}
- * {{CURRENT_SATURDAY}}
- *
- * Examples:
- *
- * {{CURRENT_WEEK}}
- * -> Week of 8/9/26 - 8/15/26
- *
- * {{CURRENT_MONDAY}}
- * -> Monday, August 10th, 2026 (8/10/2026)
- */
+const DAY_NAMES = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday'
+];
 
-function updateCurrentWeekDates() {
-  const doc = DocumentApp.getActiveDocument();
-  const body = doc.getBody();
+const UPPER_DAY_NAMES = [
+  'SUNDAY',
+  'MONDAY',
+  'TUESDAY',
+  'WEDNESDAY',
+  'THURSDAY',
+  'FRIDAY',
+  'SATURDAY'
+];
 
-  const today = new Date();
-
-  // JavaScript:
-  // Sunday = 0
-  // Monday = 1
-  // ...
-  // Saturday = 6
-  const todayDay = today.getDay();
-
-  // Find Sunday of the current week.
-  const sunday = new Date(today);
-  sunday.setDate(today.getDate() - todayDay);
-
-  // Find Saturday of the current week.
-  const saturday = new Date(sunday);
-  saturday.setDate(sunday.getDate() + 6);
-
-  const dayNames = [
-    'SUNDAY',
-    'MONDAY',
-    'TUESDAY',
-    'WEDNESDAY',
-    'THURSDAY',
-    'FRIDAY',
-    'SATURDAY'
-  ];
-
-  // ------------------------------------------
-  // Update {{CURRENT_WEEK}}
-  // ------------------------------------------
-
-  const weekText =
-    `Week of ${formatShortDate(sunday)} - ${formatShortDate(saturday)}`;
-
-  body.replaceText(
-    '\\{\\{CURRENT_WEEK\\}\\}',
-    weekText
-  );
-
-  // ------------------------------------------
-  // Update all seven days
-  // ------------------------------------------
-
-  for (let i = 0; i < 7; i++) {
-    const date = new Date(sunday);
-    date.setDate(sunday.getDate() + i);
-
-    const placeholder =
-      `\\{\\{CURRENT_${dayNames[i]}\\}\\}`;
-
-    const formattedDate = formatDate(date);
-
-    body.replaceText(
-      placeholder,
-      formattedDate
-    );
-  }
-
-  doc.saveAndClose();
-}
-
+const MONTH_NAMES = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December'
+];
 
 /**
  * Formats a date as:
@@ -93,33 +39,8 @@ function updateCurrentWeekDates() {
  * Monday, August 17th, 2026 (8/17/2026)
  */
 function formatDate(date) {
-  const dayNames = [
-    'Sunday',
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday'
-  ];
-
-  const monthNames = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December'
-  ];
-
-  const dayName = dayNames[date.getDay()];
-  const monthName = monthNames[date.getMonth()];
+  const dayName = DAY_NAMES[date.getDay()];
+  const monthName = MONTH_NAMES[date.getMonth()];
   const day = date.getDate();
   const year = date.getFullYear();
 
@@ -177,6 +98,110 @@ function getOrdinal(day) {
   }
 }
 
+function updateWeekDates(prefix, refDate) {
+  const doc = DocumentApp.getActiveDocument();
+  const body = doc.getBody();
+
+  // JavaScript:
+  // Sunday = 0
+  // Monday = 1
+  // ...
+  // Saturday = 6
+  const refDay = refDate.getDay();
+
+  // Find Sunday of the current week.
+  const sunday = new Date(refDate);
+  sunday.setDate(refDate.getDate() - refDay);
+
+  // Find Saturday of the current week.
+  const saturday = new Date(sunday);
+  saturday.setDate(sunday.getDate() + 6);
+
+  // ------------------------------------------
+  // Update {{CURRENT_WEEK}}
+  // ------------------------------------------
+
+  const weekText =
+    `Week of ${formatShortDate(sunday)} - ${formatShortDate(saturday)}`;
+
+  body.replaceText(
+    `\\{\\{${prefix}_WEEK\\}\\}`,
+    weekText
+  );
+
+  // ------------------------------------------
+  // Update all seven days
+  // ------------------------------------------
+
+  for (let i = 0; i < 7; i++) {
+    const weekDate = new Date(sunday);
+    weekDate.setDate(sunday.getDate() + i);
+
+    const placeholder =
+      `\\{\\{${prefix}_${UPPER_DAY_NAMES[i]}\\}\\}`;
+
+    const formattedDate = formatDate(weekDate);
+
+    body.replaceText(
+      placeholder,
+      formattedDate
+    );
+  }
+
+  doc.saveAndClose();
+}
+
+/**
+ * Updates all CURRENT_* date placeholders in the Google Doc.
+ *
+ * Placeholders:
+ *
+ * {{CURRENT_WEEK}}
+ * {{CURRENT_SUNDAY}}
+ * {{CURRENT_MONDAY}}
+ * {{CURRENT_TUESDAY}}
+ * {{CURRENT_WEDNESDAY}}
+ * {{CURRENT_THURSDAY}}
+ * {{CURRENT_FRIDAY}}
+ * {{CURRENT_SATURDAY}}
+ *
+ * Examples:
+ *
+ * {{CURRENT_WEEK}}
+ * -> Week of 8/9/26 - 8/15/26
+ *
+ * {{CURRENT_MONDAY}}
+ * -> Monday, August 10th, 2026 (8/10/2026)
+ */
+function updateCurrentWeekDates() {
+  // updateWeekDates("CURRENT", new Date());
+  updateWeekDates("CUSTOM", new Date());
+}
+
+function updateUpcomingWeekDates() {
+  const nextWeek = new Date();
+  nextWeek.setDate(nextWeek.getDate() + 7);
+
+  // updateWeekDates("UPCOMING", new Date());
+  updateWeekDates("CUSTOM", nextWeek);
+}
+
+function updateCustomWeekDates() {
+  const ui = DocumentApp.getUi();
+  const selectWeekPrompt = "Enter a date within the week you plan to use. "
+    + "For best results use the date time string format (DTSF). "
+    + 'e.g. for September 8th, 2026, you can enter "9/8/2026" '
+    + "or '2026-09-08' in DTSF."
+  const response = ui.prompt(selectWeekPrompt).getResponseText();
+  console.log(`The user said: ${response}`);
+
+  const refDate = new Date(response);
+  if (isNaN(refDate)) {
+    ui.alert("Invalid date. Unable to perform operation.");
+    return;
+  }
+  updateWeekDates("CUSTOM", refDate);
+}
 
 /**
  * Adds a custom menu to the Google Doc.
@@ -185,5 +210,7 @@ function onOpen() {
   DocumentApp.getUi()
     .createMenu('Dates')
     .addItem('Update Current Week', 'updateCurrentWeekDates')
+    .addItem('Update Upcoming Week', 'updateUpcomingWeekDates')
+    .addItem('Update Custom Week', 'updateCustomWeekDates')
     .addToUi();
 }
