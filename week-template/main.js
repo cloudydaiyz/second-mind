@@ -33,6 +33,8 @@ const MONTH_NAMES = [
   'December'
 ];
 
+const PREFIX = "CUSTOM";
+
 /**
  * Formats a date as:
  *
@@ -124,7 +126,7 @@ function getOrdinal(day) {
  * 
  * etc.
  */
-function updateWeekDates(prefix, refDate) {
+function updateWeekDates(refDate) {
   const doc = DocumentApp.getActiveDocument();
   const body = doc.getBody();
 
@@ -151,7 +153,7 @@ function updateWeekDates(prefix, refDate) {
     `Week of ${formatShortDate(sunday)} - ${formatShortDate(saturday)}`;
 
   body.replaceText(
-    `\\{\\{${prefix}_WEEK\\}\\}`,
+    `\\{\\{${PREFIX}_WEEK\\}\\}`,
     weekText
   );
 
@@ -164,9 +166,10 @@ function updateWeekDates(prefix, refDate) {
     weekDate.setDate(sunday.getDate() + i);
 
     const placeholder =
-      `\\{\\{${prefix}_${UPPER_DAY_NAMES[i]}\\}\\}`;
+      `\\{\\{${PREFIX}_${UPPER_DAY_NAMES[i]}\\}\\}`;
 
     const formattedDate = formatDate(weekDate);
+    console.log(`Updated ${placeholder} to ${formattedDate}`);
 
     body.replaceText(
       placeholder,
@@ -179,7 +182,7 @@ function updateWeekDates(prefix, refDate) {
 
 function updateCurrentWeekDates() {
   // updateWeekDates("CURRENT", new Date());
-  updateWeekDates("CUSTOM", new Date());
+  updateWeekDates(new Date());
 }
 
 function updateUpcomingWeekDates() {
@@ -187,7 +190,7 @@ function updateUpcomingWeekDates() {
   nextWeek.setDate(nextWeek.getDate() + 7);
 
   // updateWeekDates("UPCOMING", new Date());
-  updateWeekDates("CUSTOM", nextWeek);
+  updateWeekDates(nextWeek);
 }
 
 function updateCustomWeekDates() {
@@ -204,7 +207,7 @@ function updateCustomWeekDates() {
     ui.alert("Invalid date. Unable to perform operation.");
     return;
   }
-  updateWeekDates("CUSTOM", refDate);
+  updateWeekDates(refDate);
 }
 
 /**
