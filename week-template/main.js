@@ -101,11 +101,11 @@ function getOrdinal(day) {
 }
 
 /**
- * Updates all `{prefix}_*` date placeholders in the Google Doc
+ * Updates all `{PREFIX}_*` date placeholders in the Google Doc
  * based on the given reference date (`refDate`).
  * 
  * For example,
- * if `prefix = "CURRENT"` and the reference date was 8/11/26.
+ * if `PREFIX = "CURRENT"` and the reference date was 8/11/26.
  *
  * Placeholders:
  *
@@ -181,15 +181,12 @@ function updateWeekDates(refDate) {
 }
 
 function updateCurrentWeekDates() {
-  // updateWeekDates("CURRENT", new Date());
   updateWeekDates(new Date());
 }
 
 function updateUpcomingWeekDates() {
   const nextWeek = new Date();
   nextWeek.setDate(nextWeek.getDate() + 7);
-
-  // updateWeekDates("UPCOMING", new Date());
   updateWeekDates(nextWeek);
 }
 
