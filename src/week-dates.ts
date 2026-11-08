@@ -40,7 +40,7 @@ const PREFIX = "CUSTOM";
  *
  * Monday, August 17th, 2026 (8/17/2026)
  */
-function formatDate(date) {
+function formatDate(date: Date) {
   const dayName = DAY_NAMES[date.getDay()];
   const monthName = MONTH_NAMES[date.getMonth()];
   const day = date.getDate();
@@ -57,7 +57,7 @@ function formatDate(date) {
  *
  * 8/9/26
  */
-function formatShortDate(date) {
+function formatShortDate(date: Date) {
   const month = date.getMonth() + 1;
   const day = date.getDate();
 
@@ -80,7 +80,7 @@ function formatShortDate(date) {
  * 12th
  * 13th
  */
-function getOrdinal(day) {
+function getOrdinal(day: number) {
   if (day >= 11 && day <= 13) {
     return 'th';
   }
@@ -126,7 +126,7 @@ function getOrdinal(day) {
  * 
  * etc.
  */
-function updateWeekDates(refDate) {
+function updateWeekDates(refDate: Date) {
   const doc = DocumentApp.getActiveDocument();
   const body = doc.getBody();
 
@@ -180,17 +180,17 @@ function updateWeekDates(refDate) {
   doc.saveAndClose();
 }
 
-function updateCurrentWeekDates() {
+export function updateCurrentWeekDates() {
   updateWeekDates(new Date());
 }
 
-function updateUpcomingWeekDates() {
+export function updateUpcomingWeekDates() {
   const nextWeek = new Date();
   nextWeek.setDate(nextWeek.getDate() + 7);
   updateWeekDates(nextWeek);
 }
 
-function updateCustomWeekDates() {
+export function updateCustomWeekDates() {
   const ui = DocumentApp.getUi();
   const selectWeekPrompt = "Enter a date within the week you plan to use. "
     + "For best results use the date time string format (DTSF). "
@@ -200,21 +200,9 @@ function updateCustomWeekDates() {
   console.log(`The user said: ${response}`);
 
   const refDate = new Date(response);
-  if (isNaN(refDate)) {
+  if (isNaN(refDate.getTime())) {
     ui.alert("Invalid date. Unable to perform operation.");
     return;
   }
   updateWeekDates(refDate);
-}
-
-/**
- * Adds a custom menu to the Google Doc.
- */
-function onOpen() {
-  DocumentApp.getUi()
-    .createMenu('Dates')
-    .addItem('Update Current Week', 'updateCurrentWeekDates')
-    .addItem('Update Upcoming Week', 'updateUpcomingWeekDates')
-    .addItem('Update Custom Week', 'updateCustomWeekDates')
-    .addToUi();
 }
