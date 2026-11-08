@@ -180,17 +180,17 @@ function updateWeekDates(refDate: Date) {
   doc.saveAndClose();
 }
 
-export function updateCurrentWeekDates() {
+function updateCurrentWeekDates() {
   updateWeekDates(new Date());
 }
 
-export function updateUpcomingWeekDates() {
+function updateUpcomingWeekDates() {
   const nextWeek = new Date();
   nextWeek.setDate(nextWeek.getDate() + 7);
   updateWeekDates(nextWeek);
 }
 
-export function updateCustomWeekDates() {
+function updateCustomWeekDates() {
   const ui = DocumentApp.getUi();
   const selectWeekPrompt = "Enter a date within the week you plan to use. "
     + "For best results use the date time string format (DTSF). "
@@ -205,4 +205,18 @@ export function updateCustomWeekDates() {
     return;
   }
   updateWeekDates(refDate);
+}
+
+Object.assign(globalThis, {
+  updateCurrentWeekDates,
+  updateUpcomingWeekDates,
+  updateCustomWeekDates,
+});
+
+export function addWeekDatesToDoc(ui: GoogleAppsScript.Base.Ui) {
+  ui.createMenu('Dates')
+    .addItem('Update Current Week', 'updateCurrentWeekDates')
+    .addItem('Update Upcoming Week', 'updateUpcomingWeekDates')
+    .addItem('Update Custom Week', 'updateCustomWeekDates')
+    .addToUi();
 }
