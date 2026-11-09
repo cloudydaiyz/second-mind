@@ -2,7 +2,7 @@
 
 Scripts related to the Second Mind project.
 
-Uses `clasp` for updating Google Apps Scripts.
+[![clasp](https://img.shields.io/badge/built%20with-clasp-4285f4.svg)](https://github.com/google/clasp)
 
 ## See more
 
