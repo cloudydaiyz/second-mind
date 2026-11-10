@@ -213,7 +213,7 @@ Object.assign(globalThis, {
   updateCustomWeekDates,
 });
 
-export function addWeekDatesToDoc(ui: GoogleAppsScript.Base.Ui) {
+export function getWeekDatesMenu(ui: GoogleAppsScript.Base.Ui) {
   return ui.createMenu('Dates')
     .addItem('Update Current Week', 'updateCurrentWeekDates')
     .addItem('Update Upcoming Week', 'updateUpcomingWeekDates')
