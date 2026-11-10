@@ -1,14 +1,15 @@
 {
   "name": "second-mind",
   "version": "1.0.0",
+  "type": "module",
   "keywords": [],
   "author": "Kylan Duncan",
   "license": "ISC",
   "private": true,
   "main": "Code.js",
   "scripts": {
-    "build": "rollup -c",
-    "push": "npm run build && cp .clasp.json dist/.clasp.json && cp appsscript.json dist/appsscript.json && cd dist && clasp push",
+    "build": "node scripts/build.js",
+    "push": "npm run build && clasp push",
     "deploy": "npm run push && clasp deploy"
   },
   "devDependencies": {
@@ -17,6 +18,7 @@
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-typescript": "^12.3.1",
     "@types/google-apps-script": "^2.0.15",
+    "@types/node": "^22.20.5",
     "rollup": "^4.68.0",
     "typescript": "~5.9.3"
   }
