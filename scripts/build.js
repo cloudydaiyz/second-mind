@@ -4,6 +4,27 @@ import { exec } from "node:child_process";
 import { rollup } from "rollup";
 import typescript from '@rollup/plugin-typescript';
 
+/**
+ * @param {string} command 
+ * @param {Parameters<typeof import("node:child_process").exec>[1]} options 
+ * @param {Parameters<typeof import("node:child_process").exec>[2]} callback 
+ */
+function promisifyExec(command, options, callback) {
+  return new Promise((res, rej) => {
+    exec(command, options, (error, stdout, stderr) => {
+      if (callback) {
+        callback(error, stdout, stderr);
+        return;
+      }
+
+      if (error) {
+        rej(error);
+      }
+      res();
+    });
+  });
+}
+
 async function build() {
   const scriptId = process.env.SCRIPT_ID;
   if (!scriptId) {
@@ -34,26 +55,12 @@ async function build() {
 
 async function push() {
   await build();
-  await new Promise((res, rej) => {
-    exec("clasp push", { cwd: "dist", timeout: 30000 }, (error) => {
-      if (error) {
-        rej(error);
-      }
-      res();
-    });
-  });
+  await promisifyExec("clasp push", { cwd: "dist", timeout: 30000 });
 }
 
 async function deploy() {
   await push();
-  await new Promise((res, rej) => {
-    exec("clasp deploy", { cwd: "dist", timeout: 30000 }, (error) => {
-      if (error) {
-        rej(error);
-      }
-      res();
-    });
-  });
+  await promisifyExec("clasp deploy", { cwd: "dist", timeout: 30000 });
 }
 
 async function main() {
