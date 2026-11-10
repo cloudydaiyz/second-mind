@@ -5,7 +5,7 @@ import { addWeekDatesToDoc } from "./week-dates";
  */
 function onOpen() {
   const ui = DocumentApp.getUi();
-  addWeekDatesToDoc(ui);
+  addWeekDatesToDoc(ui).addToUi();
 }
 
 Object.assign(globalThis, {
