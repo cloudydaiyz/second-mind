@@ -80,6 +80,6 @@ Object.assign(globalThis, {
 
 export function getTodayMenu(ui: GoogleAppsScript.Base.Ui) {
   return ui.createMenu('Today')
-    .addItem('Move to next bookmark', 'moveTodayToNextBookmark')
-    .addItem('Move to custom bookmark', 'moveTodayToCustomBookmark')
+    .addItem('Replace next bookmark', 'moveTodayToNextBookmark')
+    .addItem('Replace custom bookmark', 'moveTodayToCustomBookmark')
 }

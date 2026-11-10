@@ -9,8 +9,8 @@
   "main": "Code.js",
   "scripts": {
     "build": "node scripts/build.js",
-    "push": "npm run build && clasp push",
-    "deploy": "npm run push && clasp deploy"
+    "push": "node scripts/build.js push",
+    "deploy": "node scripts/build.js deploy"
   },
   "devDependencies": {
     "@google/clasp": "^3.4.1",

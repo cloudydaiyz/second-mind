@@ -1,6 +1,7 @@
-import { rollup } from "rollup";
 import fs from "fs/promises";
 import path from "path";
+import { exec } from "node:child_process";
+import { rollup } from "rollup";
 import typescript from '@rollup/plugin-typescript';
 
 async function build() {
@@ -31,4 +32,52 @@ async function build() {
   await fs.cp("appsscript.json", path.join("dist", "appsscript.json"));
 }
 
-build();
+async function push() {
+  await build();
+  await new Promise((res, rej) => {
+    exec("clasp push", { cwd: "dist", timeout: 30000 }, (error) => {
+      if (error) {
+        rej(error);
+      }
+      res();
+    });
+  });
+}
+
+async function deploy() {
+  await push();
+  await new Promise((res, rej) => {
+    exec("clasp deploy", { cwd: "dist", timeout: 30000 }, (error) => {
+      if (error) {
+        rej(error);
+      }
+      res();
+    });
+  });
+}
+
+async function main() {
+  if (process.argv.length == 2) {
+    await build();
+    return;
+  }
+
+  if (process.argv.length == 3) {
+    const action = process.argv[2];
+    if (action == "build") {
+      await build();
+    } else if (action == "push") {
+      await push();
+    } else if (action == "deploy") {
+      await deploy();
+    } else {
+      console.log("Error: Invalid action");
+      process.exit(1);
+    }
+  } else {
+    console.log("Error: At most 1 command line argument is accepted");
+    process.exit(1);
+  }
+}
+
+main();
