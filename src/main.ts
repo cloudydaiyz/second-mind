@@ -1,17 +1,10 @@
-import { getTodayMenu } from "./today";
-import { getWeekTemplateMenu } from "./week-template";
+import { buildSecondMindMenu } from "./utils";
 
 /**
  * Adds a custom menu to the Google Doc.
  */
 function onOpen() {
-  const ui = DocumentApp.getUi();
-  ui.createMenu("Second Mind")
-    .addSubMenu(getWeekTemplateMenu(ui))
-    .addSubMenu(getTodayMenu(ui))
-    .addToUi();
+  buildSecondMindMenu().addToUi();
 }
 
-Object.assign(globalThis, {
-  onOpen
-});
+Object.assign(globalThis, { onOpen });

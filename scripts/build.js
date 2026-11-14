@@ -28,20 +28,40 @@ function promisifyExec(command, options, callback) {
 async function build() {
   const scriptId = process.env.SCRIPT_ID;
   if (!scriptId) {
-    console.log("Error: SCRIPT_ID environment variable undefined.");
-    process.exit(1);
+    throw new Error("SCRIPT_ID environment variable undefined.");
   }
 
-  const bundle = await rollup({
+  const mainBundle = await rollup({
     input: path.join("src", "main.ts"),
     plugins: [typescript()]
   });
-  const { output } = await bundle.generate({ format: 'cjs' });
-  const code = output[0].code;
+  const { output: mainOutput } = await mainBundle.generate({ format: 'cjs' });
+  const mainCode = mainOutput[0].code;
 
-  await fs.rmdir("dist", { recursive: true });
+  await fs.rm("dist", { force: true, recursive: true });
   await fs.mkdir("dist", { recursive: true });
-  await fs.writeFile(path.join("dist", "main.js"), code);
+  await fs.writeFile(path.join("dist", "main.js"), mainCode);
+
+  const INCLUDE_SANDBOX = process.env.INCLUDE_SANDBOX;
+  if (INCLUDE_SANDBOX === "1") {
+    const sandboxExists = await fs.access(path.join("src", "sandbox.ts"))
+      .then(() => true).catch(() => false);
+    if (sandboxExists) {
+      const sandboxBundle = await rollup({
+        input: path.join("src", "sandbox.ts"),
+        plugins: [typescript()],
+      });
+      const { output: sandboxOutput } = await sandboxBundle.generate({ format: 'cjs' });
+
+      const sandboxModuleId = sandboxOutput[0].moduleIds[0];
+      if (sandboxOutput[0].modules[sandboxModuleId].renderedLength != 0) {
+        const sandboxCode = sandboxOutput[0].code;
+        await fs.writeFile(path.join("dist", "sandbox.js"), sandboxCode);
+      }
+    } else {
+      console.warning("No sandbox file detected.");
+    }
+  }
 
   const rawProjectSettings = await fs.readFile(".clasp.json", { encoding: "utf8" });
   const projectSettings = JSON.parse(rawProjectSettings)
