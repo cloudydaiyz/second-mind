@@ -31,16 +31,8 @@ async function build() {
     throw new Error("SCRIPT_ID environment variable undefined.");
   }
 
-  const mainBundle = await rollup({
-    input: path.join("src", "main.ts"),
-    plugins: [typescript()]
-  });
-  const { output: mainOutput } = await mainBundle.generate({ format: 'cjs' });
-  const mainCode = mainOutput[0].code;
-
   await fs.rm("dist", { force: true, recursive: true });
   await fs.mkdir("dist", { recursive: true });
-  await fs.writeFile(path.join("dist", "main.js"), mainCode);
 
   const INCLUDE_SANDBOX = process.env.INCLUDE_SANDBOX;
   if (INCLUDE_SANDBOX === "1") {
@@ -61,6 +53,14 @@ async function build() {
     } else {
       console.warning("No sandbox file detected.");
     }
+  } else {
+    const mainBundle = await rollup({
+      input: path.join("src", "main.ts"),
+      plugins: [typescript()]
+    });
+    const { output: mainOutput } = await mainBundle.generate({ format: 'cjs' });
+    const mainCode = mainOutput[0].code;
+    await fs.writeFile(path.join("dist", "main.js"), mainCode);
   }
 
   const rawProjectSettings = await fs.readFile(".clasp.json", { encoding: "utf8" });

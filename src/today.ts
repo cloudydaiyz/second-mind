@@ -1,3 +1,5 @@
+const MOVE_TO_CUSTOM_BOOKMARK_TITLE = "Move to custom bookmark";
+const REPLACE_CUSTOM_BOOKMARK_TITLE = "Replace custom bookmark";
 const DAILY_BOOKMARK_TEXT = "Daily Bookmark";
 
 /** 
@@ -10,13 +12,20 @@ interface ElementInfo {
   index: number;
 }
 
-function customBookmarkPrompt() {
+function customBookmarkPrompt(title: string) {
   const ui = DocumentApp.getUi();
   const selectCustomBookmarkPrompt = "Enter the bookmark ID. "
     + "You can find it in the link to the bookmark.";
-  const customBookmarkId = ui.prompt(selectCustomBookmarkPrompt).getResponseText();
-  console.log(`The user said: ${customBookmarkId}`);
-  return customBookmarkId;
+  const customBookmarkResponse = ui.prompt(
+    title,
+    selectCustomBookmarkPrompt,
+    ui.ButtonSet.OK_CANCEL
+  );
+
+  if (customBookmarkResponse.getSelectedButton() == ui.Button.CANCEL) {
+    return undefined;
+  }
+  return customBookmarkResponse.getResponseText();
 }
 
 /**
@@ -153,36 +162,58 @@ function getBookmarkInfoById(id?: string, fromElements?: ElementInfo[]): Element
   return bookmark;
 }
 
-// ======== //
-
-function todayToDailyBookmark() {
+function findNextDailyBookmark(today: ElementInfo) {
   const doc = DocumentApp.getActiveDocument();
   const body = doc.getBody();
 
-  const today = getBookmarkInfoById();
-  const todayRange = doc.newRange()
-    .addElement(today.element)
-    .build();
-  let searchResult = todayRange.getRangeElements()[0];
-  console.log('init searchResult offset', searchResult?.getStartOffset().toString(), searchResult?.getEndOffsetInclusive().toString());
+  const todayRange = doc.newRange().addElement(today.element).build();
+  let searchResult = todayRange.getRangeElements()[0]!;
+  let nextDailyBookmark: GoogleAppsScript.Document.Element | null = null;
+  searchResult = body.findElement(
+    DocumentApp.ElementType.PARAGRAPH,
+    searchResult,
+  );
 
-  // Search until the paragraph is found.
-  let nextDailyBookmarkEle: GoogleAppsScript.Document.Element | null = null;
-  while (
-    (searchResult = body.findElement(
-      DocumentApp.ElementType.PARAGRAPH,
-      searchResult,
-    ))) {
+  while (searchResult) {
     const found = searchResult.getElement().asParagraph();
     if (found.getText() == DAILY_BOOKMARK_TEXT && found.getHeading() !== DocumentApp.ParagraphHeading.NORMAL) {
-      nextDailyBookmarkEle = found;
+      nextDailyBookmark = found;
+      break;
+    }
+
+    searchResult = body.findElement(
+      DocumentApp.ElementType.PARAGRAPH,
+      searchResult,
+    );
+  }
+  return nextDailyBookmark;
+}
+
+function findNextBookmark(today: ElementInfo, allBookmarks: ElementInfo[]) {
+  let nextBookmark: ElementInfo | null = null;
+  for (let i = 0; i < allBookmarks.length - 1; i++) {
+    console.log(i);
+    const currentBookmark = allBookmarks[i]!;
+    if (currentBookmark.id == today.id) {
+      console.log("bookmark found");
+      nextBookmark = allBookmarks[i + 1]!;
       break;
     }
   }
+  return nextBookmark;
+}
 
+// ======== //
+
+function todayToNextDailyBookmark() {
+  const doc = DocumentApp.getActiveDocument();
+  const body = doc.getBody();
+  const today = getBookmarkInfoById();
+  const nextDailyBookmarkEle = findNextDailyBookmark(today);
   if (!nextDailyBookmarkEle) {
     throw new Error("Unable to perform action: unable to find the next daily bookmark.");
   }
+
   const nextDailyBookmark: ElementInfo = {
     id: "daily-bookmark",
     element: nextDailyBookmarkEle,
@@ -199,19 +230,9 @@ function todayToNextBookmark(replace = false) {
 
   const allBookmarks = getAllBookmarks(body, documentTab);
   const today = getBookmarkInfoById(undefined, allBookmarks);
-
-  let nextBookmark: ElementInfo | null = null;
-  for (let i = 0; i < allBookmarks.length - 1; i++) {
-    console.log(i);
-    const currentBookmark = allBookmarks[i]!;
-    if (currentBookmark.id == today.id) {
-      console.log("bookmark found");
-      nextBookmark = allBookmarks[i + 1]!;
-      break;
-    }
-  }
-
+  const nextBookmark = findNextBookmark(today, allBookmarks);
   console.log("nextBookmark:", nextBookmark);
+
   if (!nextBookmark) {
     console.error("Unable to perform action: next bookmark not found");
     return;
@@ -240,7 +261,7 @@ export function todayToCustomBookmark(customBookmarkId: string, replace = false)
 // ======== //
 
 function moveTodayToNextDailyBookmark() {
-  todayToDailyBookmark();
+  todayToNextDailyBookmark();
 }
 
 function moveTodayToNextBookmark() {
@@ -252,11 +273,17 @@ function replaceNextBookmarkWithToday() {
 }
 
 function moveTodayToCustomBookmark() {
-  todayToCustomBookmark(customBookmarkPrompt());
+  const customBookmarkId = customBookmarkPrompt(MOVE_TO_CUSTOM_BOOKMARK_TITLE);
+  if (customBookmarkId) {
+    todayToCustomBookmark(customBookmarkId);
+  }
 }
 
 function replaceCustomBookmarkWithToday() {
-  todayToCustomBookmark(customBookmarkPrompt(), true);
+  const customBookmarkId = customBookmarkPrompt(REPLACE_CUSTOM_BOOKMARK_TITLE);
+  if (customBookmarkId) {
+    todayToCustomBookmark(customBookmarkId, true);
+  }
 }
 
 // ======== //
@@ -274,6 +301,6 @@ export function getTodayMenu(ui: GoogleAppsScript.Base.Ui) {
     .addItem('Move to next Daily Bookmark', 'moveTodayToNextDailyBookmark')
     .addItem('Move to next bookmark', 'moveTodayToNextBookmark')
     .addItem('Replace next bookmark', 'replaceNextBookmarkWithToday')
-    .addItem('Move to custom bookmark', 'moveTodayToCustomBookmark')
-    .addItem('Replace custom bookmark', 'moveTodayToCustomBookmark')
+    .addItem(MOVE_TO_CUSTOM_BOOKMARK_TITLE, 'moveTodayToCustomBookmark')
+    .addItem(REPLACE_CUSTOM_BOOKMARK_TITLE, 'replaceCustomBookmarkWithToday')
 }
