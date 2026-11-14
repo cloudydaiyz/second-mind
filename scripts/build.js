@@ -55,12 +55,12 @@ async function build() {
 
 async function push() {
   await build();
-  await promisifyExec("clasp push", { cwd: "dist", timeout: 30000 });
+  await promisifyExec("clasp push --force", { cwd: "dist", timeout: 30000 });
 }
 
 async function deploy() {
   await push();
-  await promisifyExec("clasp deploy", { cwd: "dist", timeout: 30000 });
+  await promisifyExec("clasp deploy --force", { cwd: "dist", timeout: 30000 });
 }
 
 async function main() {

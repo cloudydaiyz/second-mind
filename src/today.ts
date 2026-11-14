@@ -14,6 +14,7 @@ function sample() {
   body.insertParagraph(2, paragraph!);
 }
 
+/** Move the text at srcBookmark to the text at dstBookmark */
 function moveToBookmark(
   srcBookmark: GoogleAppsScript.Document.Bookmark,
   dstBookmark: GoogleAppsScript.Document.Bookmark
