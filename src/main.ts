@@ -1,13 +1,10 @@
-import { addWeekDatesToDoc } from "./week-dates";
+import { buildSecondMindMenu } from "./utils";
 
 /**
  * Adds a custom menu to the Google Doc.
  */
 function onOpen() {
-  const ui = DocumentApp.getUi();
-  addWeekDatesToDoc(ui).addToUi();
+  buildSecondMindMenu().addToUi();
 }
 
-Object.assign(globalThis, {
-  onOpen
-});
+Object.assign(globalThis, { onOpen });
