@@ -1,5 +1,5 @@
 import { getTodayMenu } from "./today";
-import { getWeekDatesMenu } from "./week-dates";
+import { getWeekTemplateMenu } from "./week-template";
 
 /**
  * Adds a custom menu to the Google Doc.
@@ -7,7 +7,7 @@ import { getWeekDatesMenu } from "./week-dates";
 function onOpen() {
   const ui = DocumentApp.getUi();
   ui.createMenu("Second Mind")
-    .addSubMenu(getWeekDatesMenu(ui))
+    .addSubMenu(getWeekTemplateMenu(ui))
     .addSubMenu(getTodayMenu(ui))
     .addToUi();
 }

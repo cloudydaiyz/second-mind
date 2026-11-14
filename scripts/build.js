@@ -39,6 +39,7 @@ async function build() {
   const { output } = await bundle.generate({ format: 'cjs' });
   const code = output[0].code;
 
+  await fs.rmdir("dist", { recursive: true });
   await fs.mkdir("dist", { recursive: true });
   await fs.writeFile(path.join("dist", "main.js"), code);
 
