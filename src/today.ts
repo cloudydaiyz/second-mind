@@ -203,8 +203,6 @@ function findNextBookmark(today: ElementInfo, allBookmarks: ElementInfo[]) {
   return nextBookmark;
 }
 
-// ======== //
-
 function todayToNextDailyBookmark() {
   const doc = DocumentApp.getActiveDocument();
   const body = doc.getBody();
@@ -258,8 +256,6 @@ export function todayToCustomBookmark(customBookmarkId: string, replace = false)
   moveToElement(today, customBookmark, replace);
 }
 
-// ======== //
-
 function moveTodayToNextDailyBookmark() {
   todayToNextDailyBookmark();
 }
@@ -285,8 +281,6 @@ function replaceCustomBookmarkWithToday() {
     todayToCustomBookmark(customBookmarkId, true);
   }
 }
-
-// ======== //
 
 Object.assign(globalThis, {
   moveTodayToNextDailyBookmark,
