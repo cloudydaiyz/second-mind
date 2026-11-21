@@ -5,6 +5,16 @@ import { rollup } from "rollup";
 import typescript from '@rollup/plugin-typescript';
 
 /**
+ * @typedef {Object} BuildSettings
+ * @property {boolean} sandboxMode
+ * @property {string} dist
+ * @property {number} id
+ * @property {string} name
+ * @property {string} [email] Optional property
+ * @property {(greeting: string) => string} greet - Method signature
+ */
+
+/**
  * @param {string} command 
  * @param {Parameters<typeof import("node:child_process").exec>[1]} options 
  * @param {Parameters<typeof import("node:child_process").exec>[2]} callback 
@@ -25,7 +35,10 @@ function promisifyExec(command, options, callback) {
   });
 }
 
-async function build() {
+/**
+ * @param {BuildSettings} settings 
+ */
+async function build(settings) {
   const scriptId = process.env.SCRIPT_ID;
   if (!scriptId) {
     throw new Error("SCRIPT_ID environment variable undefined.");
@@ -74,13 +87,19 @@ async function build() {
   await fs.cp("appsscript.json", path.join("dist", "appsscript.json"));
 }
 
-async function push() {
-  await build();
+/**
+ * @param {BuildSettings} settings 
+ */
+async function push(settings) {
+  await build(settings);
   await promisifyExec("clasp push --force", { cwd: "dist", timeout: 30000 });
 }
 
-async function deploy() {
-  await push();
+/**
+ * @param {BuildSettings} settings 
+ */
+async function deploy(settings) {
+  await push(settings);
   await promisifyExec("clasp deploy --force", { cwd: "dist", timeout: 30000 });
 }
 
@@ -89,15 +108,22 @@ async function main() {
     await build();
     return;
   }
+  const sandboxMode = process.env.INCLUDE_SANDBOX && INCLUDE_SANDBOX === "1";
+
+  /** @type {BuildSettings} */
+  const settings = {
+    sandboxMode: INCLUDE_SANDBOX,
+    dist: sandboxMode ? "sandbox" : "dist",
+  }
 
   if (process.argv.length == 3) {
     const action = process.argv[2];
     if (action == "build") {
-      await build();
+      await build(settings);
     } else if (action == "push") {
-      await push();
+      await push(settings);
     } else if (action == "deploy") {
-      await deploy();
+      await deploy(settings);
     } else {
       console.log("Error: Invalid action");
       process.exit(1);
